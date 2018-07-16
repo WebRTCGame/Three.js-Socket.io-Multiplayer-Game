@@ -1,0 +1,12 @@
+{
+  "users": {
+    "id": 0,
+    "name": "",
+    "pass": "",
+    "x": 0,
+    "y": 0,
+    "kills": 0,
+    "point": 0
+  },
+  "settings": {}
+}
