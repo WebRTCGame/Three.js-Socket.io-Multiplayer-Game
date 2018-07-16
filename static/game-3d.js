@@ -69,7 +69,8 @@ animate();
 
 function gameStart(){
     const nickname = $("#nickname").val();
-    socket.emit('game-start', {nickname: nickname});
+    const password = $("#password").val();
+    socket.emit('game-start', {nickname: nickname,password:password});
     $("#start-screen").hide();
 }
 $("#start-button").on('click', gameStart);
