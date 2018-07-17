@@ -1,6 +1,7 @@
 import { GameObject } from "./GameObject.js";
 import { FIELD_HEIGHT, FIELD_WIDTH, players, bullets } from "./Game.js";
 import { Bullet } from "./Bullet.js";
+import { io } from "../server.js";
 
 export class Player extends GameObject {
     constructor(obj = {}) {
