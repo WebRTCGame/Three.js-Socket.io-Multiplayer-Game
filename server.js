@@ -24,18 +24,6 @@ import { Player } from "./modules/Player.js";
 import { Wall } from "./modules/Walls.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
 
-/*
-for (let i = 0; i < 3; i++) {
-  const wall = new Wall({
-    x: Math.random() * FIELD_WIDTH,
-    y: Math.random() * FIELD_HEIGHT,
-    width: 200,
-    height: 50
-  });
-  walls[wall.id] = wall;
-}
-*/
-
 const bot = new BotPlayer({ nickname: "bot" });
 
 players[bot.id] = bot;
@@ -50,6 +38,27 @@ io.on("connection", function(socket) {
       nickname: config.nickname,
       pass: config.password
     });
+    let playerData = getUserByUserPass(player.nickname,player.pass);
+    if (playerData !== undefined){
+      playerData.id = player.id;
+      player.x = playerData.x;
+      player.y = playerData.y;
+      player.width = playerData.width;
+      player.height = playerData.height;
+      player.angle = playerData.angle;
+      player.speed = playerData.speed;
+      player.rotationSpeed = playerData.rotationSpeed;
+      player.nickname = playerData.nickname;
+      player.pass = playerData.pass;
+      player.maxHealth = playerData.maxHealth;
+      player.point = playerData.point;
+      player.Level = playerData.Level;
+      player.Exp = playerData.Exp;
+      player.Attack = playerData.Attack;
+      player.Defense = playerData.Defense;
+      
+  
+  }
     players[player.id] = player;
     console.log(players[player.id]);
   });
@@ -69,6 +78,7 @@ io.on("connection", function(socket) {
     if (!player) {
       return;
     }
+    players[player.id].save();
     delete players[player.id];
     player = null;
   });
@@ -139,10 +149,8 @@ server.listen(port, () => {
     settings: {}
   }).write();
 
-  console.log("2");
-  console.log(db.get('Players').find({nickname:'abc'}).value());
-  console.log(getUserTaken('ab'));
-  console.log(getUserByUserPass('ab','casdf'));
+//db.get('settings').push({a:5}).write();
+db.set('settings.fun','not').write();
 });
 
 let getUserByUserPass = function(username,pass){
@@ -156,23 +164,4 @@ let getUserTaken = function(username){
 let getUserMatchesPass = function(username, pass){
     return (db.get('Players').find({nickname:username,pass:pass}).value() !== undefined);
 };
-/*
-    Players: {
-      id: 351609823,
-      x: 502.5754930370992,
-      y: 48.45093268783282,
-      width: 80,
-      height: 80,
-      angle: 0.022366698064048222,
-      speed: 5,
-      rotationSpeed: 0.1,
-      nickname: "ab",
-      pass: undefined,
-      maxHealth: 10,
-      point: 0,
-      Level:0,
-      Exp:0,
-      Attack:1,
-      Defense:1
-    }
-    */
+

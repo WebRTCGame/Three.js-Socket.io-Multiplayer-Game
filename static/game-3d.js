@@ -3,6 +3,7 @@ const canvas2d = document.getElementById('canvas-2d');
 const context = canvas2d.getContext('2d');
 const canvas3d = document.getElementById('canvas-3d');
 const playerImage = document.getElementById('player-image');
+const button = document.getElementById('start-button');
 
 const renderer = new THREE.WebGLRenderer({canvas: canvas3d});
 renderer.setClearColor('black');
@@ -68,38 +69,48 @@ function animate() {
 animate();
 
 function gameStart(){
-    //const nickname = $("#nickname").val();
+    
     const nickname = document.getElementById('nickname').value;
-    //const password = $("#password").val();
     const password = document.getElementById('password').value;
+    
     socket.emit('game-start', {nickname: nickname,password:password});
-    //$("#start-screen").hide();
+    
     document.getElementById('start-screen').style.display = 'none';
 }
-$("#start-button").on('click', gameStart);
 
-let movement = {};
-$(document).on('keydown keyup', (event) => {
-    const KeyToCommand = {
-        'ArrowUp': 'forward',
-        'ArrowDown': 'back',
-        'ArrowLeft': 'left',
-        'ArrowRight': 'right',
-    };
-    const command = KeyToCommand[event.key];
-    if(command){
-        if(event.type === 'keydown'){
-            movement[command] = true;
-        }else{ /* keyup */
-            movement[command] = false;
-        }
-        socket.emit('movement', movement);
-    }
-    if(event.key === ' ' && event.type === 'keydown'){
-        socket.emit('shoot');
-    }
+button.addEventListener('click',(e)=>{
+    gameStart();
 });
 
+
+let movement = {
+  forward: false,
+  right: false,
+  left: false,
+  back: false
+};
+const KeyToCommand = {
+  'ArrowUp': 'forward',
+  'ArrowDown': 'back',
+  'ArrowLeft': 'left',
+  'ArrowRight': 'right',
+};
+
+document.addEventListener('keydown', (event) => {
+  
+  if(event.key === ' '){socket.emit('shoot');};
+
+  movement[KeyToCommand[event.key]] = true;
+  socket.emit('movement', movement);
+}, false);
+
+document.addEventListener('keyup', (event) => {
+  
+  movement[KeyToCommand[event.key]] = false;
+  
+  socket.emit('movement', movement);
+
+}, false);
 
 
 const Meshes = [];

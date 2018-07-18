@@ -19,5 +19,7 @@
       "Defense": 1
     }
   ],
-  "settings": {}
+  "settings": {
+    "fun": "not"
+  }
 }

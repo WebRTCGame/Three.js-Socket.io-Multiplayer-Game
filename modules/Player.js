@@ -1,7 +1,7 @@
 import { GameObject } from "./GameObject.js";
 import { FIELD_HEIGHT, FIELD_WIDTH, players, bullets } from "./Game.js";
 import { Bullet } from "./Bullet.js";
-import { io } from "../server.js";
+import { io, db } from "../server.js";
 
 export class Player extends GameObject {
     constructor(obj = {}) {
@@ -23,6 +23,10 @@ export class Player extends GameObject {
         this.angle = Math.random() * 2 * Math.PI;
       } while (this.intersectWalls());
     }
+    save(){
+      let update = JSON.stringify(this);
+      db.get('Players').find({nickname:this.username,pass:this.pass}).push(update).write();
+    }
     shoot() {
       if (Object.keys(this.bullets).length >= 3) {
         return;
@@ -40,6 +44,7 @@ export class Player extends GameObject {
     damage() {
       this.health--;
       if (this.health === 0) {
+        this.save();
         this.remove();
       }
     }
