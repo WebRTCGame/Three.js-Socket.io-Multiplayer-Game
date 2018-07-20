@@ -15,30 +15,52 @@ export const db = low(adapter);
 import {
   players,
   bullets,
-  walls,
-  FIELD_WIDTH,
-  FIELD_HEIGHT
+  walls
 } from "./modules/Game.js";
 
 import { Player } from "./modules/Player.js";
-import { Wall } from "./modules/Walls.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
 
 const bot = new BotPlayer({ nickname: "bot" });
 
 players[bot.id] = bot;
 
+export let savePlayer = function(player){
+let jso = player.jso();
+let playerData = db.get('Players').find({nickname:player.nickname,pass:player.pass}).assign({
+  id: player.id,
+  Ttl:Date.now(),
+  x: player.x,
+  y: player.y,
+  width: player.width,
+  height: player.height,
+  angle: player.angle,
+  speed: player.speed,
+  rotationSpeed: player.rotationSpeed,
+  nickname: player.nickname,
+  pass: player.pass,
+  maxHealth: player.maxHealth,
+  point: player.point,
+  Level: player.Level,
+  Exp: player.Exp,
+  Attack: player.Attack,
+  Defense: player.Defense}).write();
+};
+
 io.on("connection", function(socket) {
-  console.log("----");
+  console.log("io.on connection");
   let player = null;
  
   socket.on("game-start", config => {
+    console.log("socket on game-start");
     player = new Player({
       socketId: socket.id,
       nickname: config.nickname,
       pass: config.password
     });
-    let playerData = getUserByUserPass(player.nickname,player.pass);
+    
+    let playerData = db.get('Players').find({nickname:player.nickname,pass:player.pass}).value();
+    console.log(":::: " + playerData);
     if (playerData !== undefined){
       playerData.id = player.id;
       player.x = playerData.x;
@@ -60,7 +82,9 @@ io.on("connection", function(socket) {
   
   }
     players[player.id] = player;
-    console.log(players[player.id]);
+    
+    //players[player.id].save();
+    db.get('Players').push(players[player.id].jso()).write();
   });
   socket.on("movement", function(movement) {
     if (!player || player.health === 0) {
@@ -151,6 +175,8 @@ server.listen(port, () => {
 
 //db.get('settings').push({a:5}).write();
 db.set('settings.fun','not').write();
+
+db.get('Players').find({nickname:'ab',pass:'ba'}).assign({width:500}).write();
 });
 
 let getUserByUserPass = function(username,pass){
