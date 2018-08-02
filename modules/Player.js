@@ -1,7 +1,7 @@
 import { GameObject } from "./GameObject.js";
 import { FIELD_HEIGHT, FIELD_WIDTH, players, bullets } from "./Game.js";
 import { Bullet } from "./Bullet.js";
-import { io, db } from "../server.js";
+import { io } from "../server.js";
 
 export class Player extends GameObject {
   constructor(obj = {}) {
@@ -23,59 +23,7 @@ export class Player extends GameObject {
       this.angle = Math.random() * 2 * Math.PI;
     } while (this.intersectWalls());
   }
-  save() {
-    console.log("player save 1xxxxxxx");
-    console.log('db.getState(): ' + db.getState());
-    let p = db.get('Players');
-    console.log(p);
-    console.log("saving player");
-    let p1 = p.find({nickname:this.nickname,pass:this.pass});
-    if (p1 !== undefined){
-    p1.assign({
-        //id: this.id,
-        Ttl:Date.now(),
-        x: this.x,
-        y: this.y,
-        width: this.width,
-        height: this.height,
-        angle: this.angle,
-        speed: this.speed,
-        rotationSpeed: this.rotationSpeed,
-        //nickname: this.nickname,
-        //pass: this.pass,
-        maxHealth: this.maxHealth,
-        point: this.point,
-        Level: this.Level,
-        Exp: this.Exp,
-        Attack: this.Attack,
-        Defense: this.Defense
-      }).write();
-    } else {
-      p.push({
-        id: this.id,
-        Ttl:Date.now(),
-        x: this.x,
-        y: this.y,
-        width: this.width,
-        height: this.height,
-        angle: this.angle,
-        speed: this.speed,
-        rotationSpeed: this.rotationSpeed,
-        nickname: this.nickname,
-        pass: this.pass,
-        maxHealth: this.maxHealth,
-        point: this.point,
-        Level: this.Level,
-        Exp: this.Exp,
-        Attack: this.Attack,
-        Defense: this.Defense}).write();
-    }
-    p.write();
-    console.log('done saving');
-  }
-load(){
 
-}
   shoot() {
     if (Object.keys(this.bullets).length >= 3) {
       return;

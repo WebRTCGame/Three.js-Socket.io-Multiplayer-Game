@@ -1,22 +1,32 @@
 "use strict";
-
-const express = require("express");
-const http = require("http");
-const path = require("path");
-const socketIO = require("socket.io");
+console.log(process.version);
+import express from "express";
+import http from "http";
+import path from "path";
+import socketIO from "socket.io";
 const app = express();
 const server = http.Server(app);
 export const io = socketIO(server);
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
-const adapter = new FileSync("db.json");
-export const db = low(adapter);
+import fs from "fs";
+const { promises } = fs;
 
-import {
-  players,
-  bullets,
-  walls
-} from "./modules/Game.js";
+let dataPath = path.join(process.cwd(), "data");
+let fileKey = "4nk22tdINY";
+
+function getDbPath(user) {
+  return path.join("./data", user + fileKey + ".json");
+}
+
+
+
+async function f() {
+  return await promises.readdir("./data");
+}
+f().then(data => {
+  console.log(data);
+});
+
+import { players, bullets, walls } from "./modules/Game.js";
 
 import { Player } from "./modules/Player.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
@@ -25,32 +35,37 @@ const bot = new BotPlayer({ nickname: "bot" });
 
 players[bot.id] = bot;
 
-export let savePlayer = function(player){
-let jso = player.jso();
-let playerData = db.get('Players').find({nickname:player.nickname,pass:player.pass}).assign({
-  id: player.id,
-  Ttl:Date.now(),
-  x: player.x,
-  y: player.y,
-  width: player.width,
-  height: player.height,
-  angle: player.angle,
-  speed: player.speed,
-  rotationSpeed: player.rotationSpeed,
-  nickname: player.nickname,
-  pass: player.pass,
-  maxHealth: player.maxHealth,
-  point: player.point,
-  Level: player.Level,
-  Exp: player.Exp,
-  Attack: player.Attack,
-  Defense: player.Defense}).write();
+export let savePlayer = function(player) {
+  let jso = player.jso();
+  let playerData = db
+    .get("Players")
+    .find({ nickname: player.nickname, pass: player.pass })
+    .assign({
+      id: player.id,
+      Ttl: Date.now(),
+      x: player.x,
+      y: player.y,
+      width: player.width,
+      height: player.height,
+      angle: player.angle,
+      speed: player.speed,
+      rotationSpeed: player.rotationSpeed,
+      nickname: player.nickname,
+      pass: player.pass,
+      maxHealth: player.maxHealth,
+      point: player.point,
+      Level: player.Level,
+      Exp: player.Exp,
+      Attack: player.Attack,
+      Defense: player.Defense
+    })
+    .write();
 };
 
 io.on("connection", function(socket) {
   console.log("io.on connection");
   let player = null;
- 
+
   socket.on("game-start", config => {
     console.log("socket on game-start");
     player = new Player({
@@ -58,10 +73,13 @@ io.on("connection", function(socket) {
       nickname: config.nickname,
       pass: config.password
     });
-    
-    let playerData = db.get('Players').find({nickname:player.nickname,pass:player.pass}).value();
+
+    let playerData = db
+      .get("Players")
+      .find({ nickname: player.nickname, pass: player.pass })
+      .value();
     console.log(":::: " + playerData);
-    if (playerData !== undefined){
+    if (playerData !== undefined) {
       playerData.id = player.id;
       player.x = playerData.x;
       player.y = playerData.y;
@@ -78,13 +96,13 @@ io.on("connection", function(socket) {
       player.Exp = playerData.Exp;
       player.Attack = playerData.Attack;
       player.Defense = playerData.Defense;
-      
-  
-  }
+    }
     players[player.id] = player;
-    
+
     //players[player.id].save();
-    db.get('Players').push(players[player.id].jso()).write();
+    db.get("Players")
+      .push(players[player.id].jso())
+      .write();
   });
   socket.on("movement", function(movement) {
     if (!player || player.health === 0) {
@@ -151,43 +169,4 @@ app.get("/", (request, response) => {
 const port = 3000;
 server.listen(port, () => {
   console.log(`Starting server on port ${port}`);
-  db.defaults({
-    Players: [{
-      id: 351609823,
-      x: 502.5754930370992,
-      y: 48.45093268783282,
-      width: 80,
-      height: 80,
-      angle: 0.022366698064048222,
-      speed: 5,
-      rotationSpeed: 0.1,
-      nickname: "ab",
-      pass: "ba",
-      maxHealth: 10,
-      point: 0,
-      Level:0,
-      Exp:0,
-      Attack:1,
-      Defense:1
-    }],
-    settings: {}
-  }).write();
-
-//db.get('settings').push({a:5}).write();
-db.set('settings.fun','not').write();
-
-db.get('Players').find({nickname:'ab',pass:'ba'}).assign({width:500}).write();
 });
-
-let getUserByUserPass = function(username,pass){
-return db.get('Players').find({nickname:username,pass:pass}).value();
-};
-
-let getUserTaken = function(username){
-  return (db.get('Players').find({nickname:username}).value() !== undefined)
-};
-
-let getUserMatchesPass = function(username, pass){
-    return (db.get('Players').find({nickname:username,pass:pass}).value() !== undefined);
-};
-

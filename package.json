@@ -2,9 +2,11 @@
   "name": "ubuntu",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "startx": "node -r esm server.js --experimental-repl-await --experimental-modules",
+    "start": "node -r esm server.js --experimental-repl-await --experimental-modules"
   },
   "keywords": [],
   "author": "",
@@ -12,8 +14,9 @@
   "dependencies": {
     "esm": "^3.0.71",
     "express": "^4.16.3",
-    "lowdb": "^1.0.0",
+    "fs": "0.0.1-security",
     "nodemon": "^1.17.5",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "socketio-auth": "^0.1.1"
   }
 }
