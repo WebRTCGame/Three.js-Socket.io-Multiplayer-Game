@@ -8,7 +8,8 @@ const app = express();
 const server = http.Server(app);
 export const io = socketIO(server);
 import fs from "fs";
-const { promises } = fs;
+//const { promises } = fs;
+const promises = fs.promises; //require('fs').promises;
 
 let dataPath = path.join(process.cwd(), "data");
 let fileKey = "4nk22tdINY";
@@ -17,19 +18,37 @@ function getDbPath(user) {
   return path.join("./data", user + fileKey + ".json");
 }
 
-
-
-async function f() {
+async function readDataDirectory() {
   return await promises.readdir("./data");
 }
-f().then(data => {
-  console.log(data);
-});
+
+function getDbUserData(user) {
+  return promises.readFile(getDbPath(user));
+}
+async function getUserDb(user) {
+  let x = getDbPath(user);
+  console.log(`Getting ${user} db: ` + x);
+  return JSON.parse(await promises.readFile(getDbPath(user)));
+}
+async function userMatchesPass(username, pass) {}
+getUserDb("abc").then(val => console.log(val));
+
+async function writeDbFile(user, obj) {
+  try {
+    await promises.writeFile(getDbPath(user), JSON.stringify(obj));
+  } catch (error) {
+    console.log(error);
+  }
+  console.info("file created");
+}
+
+writeDbFile("me", { a: 5 });
 
 import { players, bullets, walls } from "./modules/Game.js";
 
 import { Player } from "./modules/Player.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
+import { runMain } from "module";
 
 const bot = new BotPlayer({ nickname: "bot" });
 
@@ -62,10 +81,21 @@ export let savePlayer = function(player) {
     .write();
 };
 
-io.on("connection", function(socket) {
+io.on("connection", socket => {
   console.log("io.on connection");
+
   let player = null;
 
+  socket.on("error", error => {
+    console.log(socket.id + " error " + error);
+  });
+  socket.on("validate-user", config => {
+    console.log("validate-user");
+    console.log(config);
+    getUserDb(config.nickname).then(val => {
+      console.log(val);
+    });
+  });
   socket.on("game-start", config => {
     console.log("socket on game-start");
     player = new Player({
@@ -116,7 +146,8 @@ io.on("connection", function(socket) {
     }
     player.shoot();
   });
-  socket.on("disconnect", () => {
+  socket.on("disconnect", reason => {
+    console.log(socket.id + " disconnect " + reason);
     if (!player) {
       return;
     }
