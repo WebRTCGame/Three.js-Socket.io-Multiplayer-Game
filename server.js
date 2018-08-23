@@ -4,51 +4,24 @@ import express from "express";
 import http from "http";
 import path from "path";
 import socketIO from "socket.io";
-const app = express();
-const server = http.Server(app);
-export const io = socketIO(server);
-import fs from "fs";
-//const { promises } = fs;
-const promises = fs.promises; //require('fs').promises;
 
-let dataPath = path.join(process.cwd(), "data");
-let fileKey = "4nk22tdINY";
+import {getUserDb,writeDbFile,readDataDirectory} from "./modules/userController";
 
-function getDbPath(user) {
-  return path.join("./data", user + fileKey + ".json");
-}
-
-async function readDataDirectory() {
-  return await promises.readdir("./data");
-}
-
-function getDbUserData(user) {
-  return promises.readFile(getDbPath(user));
-}
-async function getUserDb(user) {
-  let x = getDbPath(user);
-  console.log(`Getting ${user} db: ` + x);
-  return JSON.parse(await promises.readFile(getDbPath(user)));
-}
-async function userMatchesPass(username, pass) {}
-getUserDb("abc").then(val => console.log(val));
-
-async function writeDbFile(user, obj) {
-  try {
-    await promises.writeFile(getDbPath(user), JSON.stringify(obj));
-  } catch (error) {
-    console.log(error);
-  }
-  console.info("file created");
-}
-
-writeDbFile("me", { a: 5 });
-
-import { players, bullets, walls } from "./modules/Game.js";
+import { players, bullets, walls,updatePlayers,updateBullets } from "./modules/Game.js";
 
 import { Player } from "./modules/Player.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
 import { runMain } from "module";
+
+const app = express();
+const server = http.Server(app);
+export const io = socketIO(server);
+
+readDataDirectory().then(val=>console.log(val));
+
+getUserDb("abc").then(val => console.log(val));
+
+writeDbFile("me", { a: 5 });
 
 const bot = new BotPlayer({ nickname: "bot" });
 
@@ -157,7 +130,9 @@ io.on("connection", socket => {
   });
 });
 
+/** Update all sockets */
 setInterval(() => {
+  /*
   Object.values(players).forEach(player => {
     const movement = player.movement;
     if (movement.forward) {
@@ -188,6 +163,9 @@ setInterval(() => {
       }
     });
   });
+  */
+ updatePlayers();
+ updateBullets();
   io.sockets.emit("state", players, bullets, walls);
 }, 1000 / 20);
 
@@ -198,6 +176,7 @@ app.get("/", (request, response) => {
 });
 
 const port = 3000;
+
 server.listen(port, () => {
   console.log(`Starting server on port ${port}`);
 });
