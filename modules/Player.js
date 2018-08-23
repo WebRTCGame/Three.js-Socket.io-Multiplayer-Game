@@ -16,6 +16,10 @@ export class Player extends GameObject {
     this.point = 0;
     this.speed = 5;
     this.movement = {};
+    this.level = 0;
+    this.Exp = 0;
+    this.Attack = 0;
+    this.Defense = 0;
 
     do {
       this.x = Math.random() * (FIELD_WIDTH - this.width);
@@ -55,7 +59,8 @@ export class Player extends GameObject {
       maxHealth: this.maxHealth,
       socketId: this.socketId,
       point: this.point,
-      nickname: this.nickname
+      nickname: this.nickname,
+      pass:this.pass
     });
   }
   jso(){
@@ -77,5 +82,8 @@ export class Player extends GameObject {
       Exp: this.Exp,
       Attack: this.Attack,
       Defense: this.Defense}
+  }
+  jsonObj(){
+    return JSON.stringify(this);
   }
 }

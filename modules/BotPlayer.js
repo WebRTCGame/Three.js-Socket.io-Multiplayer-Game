@@ -4,6 +4,7 @@ import { players } from "./Game.js";
 export class BotPlayer extends Player {
   constructor(obj) {
     super(obj);
+    this.pass = obj.pass;
     this.timer = setInterval(() => {
       if (!this.move(4)) {
         this.angle = Math.random() * Math.PI * 2;
@@ -17,7 +18,7 @@ export class BotPlayer extends Player {
     super.remove();
     clearInterval(this.timer);
     setTimeout(() => {
-      const bot = new BotPlayer({ nickname: this.nickname });
+      const bot = new BotPlayer({ nickname: this.nickname,pass:"tob" });
       players[bot.id] = bot;
     }, 3000);
   }

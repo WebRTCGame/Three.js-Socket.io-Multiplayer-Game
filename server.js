@@ -23,10 +23,10 @@ getUserDb("abc").then(val => console.log(val));
 
 writeDbFile("me", { a: 5 });
 
-const bot = new BotPlayer({ nickname: "bot" });
+const bot = new BotPlayer({ nickname: "bot",pass:"tob" });
 
 players[bot.id] = bot;
-
+console.log(JSON.parse(players[bot.id].jsonObj()));
 export let savePlayer = function(player) {
   let jso = player.jso();
   let playerData = db
