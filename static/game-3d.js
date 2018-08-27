@@ -7,11 +7,11 @@ const playerImage = document.getElementById("player-image");
 const buttonlogin = document.getElementById("login-button");
 const buttonnewuser = document.getElementById("newuser-button");
 buttonlogin.addEventListener("click", e => {
-    buttonlogin.innerHTML = "Validating...";
-    validateUser();
+  buttonlogin.innerHTML = "Validating...";
+  validateUser();
 });
 buttonnewuser.addEventListener("click", e => {
-  gameStart();
+  newUser();
 });
 const renderer = new THREE.WebGLRenderer({ canvas: canvas3d });
 renderer.setClearColor("black");
@@ -89,11 +89,20 @@ function gameStart() {
 
   document.getElementById("start-screen").style.display = "none";
 }
-function validateUser(){
-    const nickname = document.getElementById("nickname").value;
-    const password = document.getElementById("password").value;
-    socket.emit("validate-user", { nickname: nickname, password: password });
-};
+function validateUser() {
+  const nickname = document.getElementById("nickname").value;
+  const password = document.getElementById("password").value;
+  socket.emit("validate-user", { nickname: nickname, password: password });
+}
+function newUser() {
+  const nickname = document.getElementById("nickname").value;
+  const password = document.getElementById("password").value;
+  socket.emit("new-user", { nickname: nickname, password: password });
+}
+socket.on("newUserCreated", val => {
+  console.log("newUserCreated");
+  document.getElementById("start-screen").style.display = "none";
+});
 let movement = {
   forward: false,
   right: false,

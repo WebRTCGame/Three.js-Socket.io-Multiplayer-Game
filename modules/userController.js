@@ -31,7 +31,7 @@ export async function writeDbFile(user, obj) {
     await promises.writeFile(getDbPath(user), JSON.stringify(obj));
   } catch (error) {
     console.log(error);
-  }
+  } 
   console.info("file created");
 }
 

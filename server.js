@@ -5,9 +5,19 @@ import http from "http";
 import path from "path";
 import socketIO from "socket.io";
 
-import {getUserDb,writeDbFile,readDataDirectory} from "./modules/userController";
+import {
+  getUserDb,
+  writeDbFile,
+  readDataDirectory
+} from "./modules/userController";
 
-import { players, bullets, walls,updatePlayers,updateBullets } from "./modules/Game.js";
+import {
+  players,
+  bullets,
+  walls,
+  updatePlayers,
+  updateBullets
+} from "./modules/Game.js";
 
 import { Player } from "./modules/Player.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
@@ -17,13 +27,13 @@ const app = express();
 const server = http.Server(app);
 export const io = socketIO(server);
 
-readDataDirectory().then(val=>console.log(val));
+readDataDirectory().then(val => console.log(val));
 
 getUserDb("abc").then(val => console.log(val));
 
 writeDbFile("me", { a: 5 });
 
-const bot = new BotPlayer({ nickname: "bot",pass:"tob" });
+const bot = new BotPlayer({ nickname: "bot", pass: "tob" });
 
 players[bot.id] = bot;
 console.log(JSON.parse(players[bot.id].jsonObj()));
@@ -67,16 +77,62 @@ io.on("connection", socket => {
     console.log(config);
     getUserDb(config.nickname).then(val => {
       console.log(val);
+      if (config.pass === val.pass) {
+        player = new Player({
+          socketId: socket.id,
+          nickname: config.nickname,
+          pass: config.password
+        });
+        player.x = val.x;
+        player.y = val.y;
+        player.width = val.width;
+        player.height = val.height;
+        player.angle = val.angle;
+        player.speed = val.speed;
+        player.rotationSpeed = val.rotationSpeed;
+        player.nickname = val.nickname;
+        player.pass = val.pass;
+        player.maxHealth = val.maxHealth;
+        player.point = val.point;
+        player.Level = val.Level;
+        player.Exp = val.Exp;
+        player.Attack = val.Attack;
+        player.Defense = val.Defense;
+        socket.emit("validPlayer", {});
+      }
     });
   });
-  socket.on("game-start", config => {
-    console.log("socket on game-start");
+  socket.on("new-user", config => {
+    console.log("new-user");
+    readDataDirectory().then(val => {
+      let good = false;
+      for (let i = 0; i <= val.length; i++) {
+        console.log(val[i]);
+        console.log(config.nickname)
+        if (config.nickname === val[i].nickname){
+          
+        }
+      }
+    });
+
     player = new Player({
       socketId: socket.id,
       nickname: config.nickname,
       pass: config.password
     });
 
+    socket.emit("newUserCreated", {});
+  });
+
+  socket.on("game-start", config => {
+    console.log("socket on game-start");
+    /*
+    player = new Player({
+      socketId: socket.id,
+      nickname: config.nickname,
+      pass: config.password
+    });
+    
     let playerData = db
       .get("Players")
       .find({ nickname: player.nickname, pass: player.pass })
@@ -100,12 +156,13 @@ io.on("connection", socket => {
       player.Attack = playerData.Attack;
       player.Defense = playerData.Defense;
     }
+    */
     players[player.id] = player;
 
     //players[player.id].save();
-    db.get("Players")
-      .push(players[player.id].jso())
-      .write();
+    //db.get("Players")
+    //  .push(players[player.id].jso())
+    //  .write();
   });
   socket.on("movement", function(movement) {
     if (!player || player.health === 0) {
@@ -164,8 +221,8 @@ setInterval(() => {
     });
   });
   */
- updatePlayers();
- updateBullets();
+  updatePlayers();
+  updateBullets();
   io.sockets.emit("state", players, bullets, walls);
 }, 1000 / 20);
 
