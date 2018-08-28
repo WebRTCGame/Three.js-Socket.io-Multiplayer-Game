@@ -34,7 +34,14 @@ export async function writeDbFile(user, obj) {
   } 
   console.info("file created");
 }
-
+export async function savePlayer(player) {
+  try {
+    await promises.writeFile(getDbPath(player.nickname), JSON.stringify(player));
+  } catch (error) {
+    console.log(error);
+  } 
+  console.info("player saved");
+}
 export function copyToPlayer(player, data) {
     return Object.assign(player,data);
 }

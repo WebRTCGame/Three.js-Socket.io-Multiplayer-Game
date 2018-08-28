@@ -20,7 +20,8 @@ export class Player extends GameObject {
     this.Exp = 0;
     this.Attack = 0;
     this.Defense = 0;
-
+    this.lastPlayed = Date.now();
+    
     do {
       this.x = Math.random() * (FIELD_WIDTH - this.width);
       this.y = Math.random() * (FIELD_HEIGHT - this.height);

@@ -8,7 +8,8 @@ import socketIO from "socket.io";
 import {
   getUserDb,
   writeDbFile,
-  readDataDirectory
+  readDataDirectory,
+  savePlayer
 } from "./modules/userController";
 
 import {
@@ -36,7 +37,9 @@ writeDbFile("me", { a: 5 });
 const bot = new BotPlayer({ nickname: "bot", pass: "tob" });
 
 players[bot.id] = bot;
+
 console.log(JSON.parse(players[bot.id].jsonObj()));
+
 export let savePlayer = function(player) {
   let jso = player.jso();
   let playerData = db
@@ -72,6 +75,7 @@ io.on("connection", socket => {
   socket.on("error", error => {
     console.log(socket.id + " error " + error);
   });
+
   socket.on("validate-user", config => {
     console.log("validate-user");
     console.log(config);
@@ -108,9 +112,8 @@ io.on("connection", socket => {
       let good = false;
       for (let i = 0; i <= val.length; i++) {
         console.log(val[i]);
-        console.log(config.nickname)
-        if (config.nickname === val[i].nickname){
-          
+        console.log(config.nickname);
+        if (config.nickname === val[i].nickname) {
         }
       }
     });
