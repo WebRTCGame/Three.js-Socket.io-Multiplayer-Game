@@ -6,6 +6,7 @@ import { io } from "../server.js";
 export class Player extends GameObject {
   constructor(obj = {}) {
     super(obj);
+    console.log("new player");
     this.socketId = obj.socketId;
     this.nickname = obj.nickname;
     this.pass = obj.pass;

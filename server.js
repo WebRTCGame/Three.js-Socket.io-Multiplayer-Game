@@ -1,4 +1,5 @@
 "use strict";
+console.clear();
 console.log(process.version);
 import express from "express";
 import http from "http";
@@ -9,7 +10,9 @@ import {
   getUserDb,
   writeDbFile,
   readDataDirectory,
-  savePlayer
+  savePlayer,
+  getDbFile,
+  dbFileNameByUsername
 } from "./modules/userController";
 
 import {
@@ -23,23 +26,25 @@ import {
 import { Player } from "./modules/Player.js";
 import { BotPlayer } from "./modules/BotPlayer.js";
 import { runMain } from "module";
+import { resolve } from "url";
 
 const app = express();
 const server = http.Server(app);
 export const io = socketIO(server);
 
-readDataDirectory().then(val => console.log(val));
+//readDataDirectory().then(val => console.log(val));
 
-getUserDb("abc").then(val => console.log(val));
+//getUserDb("abc").then(val => console.log(val));
 
-writeDbFile("me", { a: 5 });
+//writeDbFile("me", { a: 5 });
 
 const bot = new BotPlayer({ nickname: "bot", pass: "tob" });
 
 players[bot.id] = bot;
 
-console.log(JSON.parse(players[bot.id].jsonObj()));
+//console.log(JSON.parse(players[bot.id].jsonObj()));
 
+/*
 export let savePlayer = function(player) {
   let jso = player.jso();
   let playerData = db
@@ -66,7 +71,7 @@ export let savePlayer = function(player) {
     })
     .write();
 };
-
+*/
 io.on("connection", socket => {
   console.log("io.on connection");
 
@@ -107,24 +112,37 @@ io.on("connection", socket => {
     });
   });
   socket.on("new-user", config => {
+    console.log(config);
     console.log("new-user");
-    readDataDirectory().then(val => {
-      let good = false;
-      for (let i = 0; i <= val.length; i++) {
-        console.log(val[i]);
-        console.log(config.nickname);
-        if (config.nickname === val[i].nickname) {
+    let found = false;
+    readDataDirectory()
+      .then(val => {
+        val.forEach(element => {
+          getDbFile(element).then(val => {
+            if (val.nickname === config.nickname) {
+              found = true;
+            }
+          });
+        });
+        return found;
+      })
+      .then(val => {
+        if (val !== true) {
+          socket.emit("usernameTaken",{});
+        } else {
+          console.log("not found on server");
+          player = new Player({
+            socketId: socket.id,
+            nickname: config.nickname,
+            pass: config.password
+          });
+          players[player.id] = player;
+          socket.emit("newUserCreated", {});
         }
-      }
-    });
+      })
+      .catch(val => console.log(val));
 
-    player = new Player({
-      socketId: socket.id,
-      nickname: config.nickname,
-      pass: config.password
-    });
-
-    socket.emit("newUserCreated", {});
+    
   });
 
   socket.on("game-start", config => {

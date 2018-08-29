@@ -80,7 +80,15 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
-
+socket.on('connect',function(data){
+  socket.send('connected');
+  socket.on("message", function(data) {
+    console.log(data);
+  });
+  socket.on("error", error => {
+    console.log(socket.id + " error " + error);
+  });
+})
 function gameStart() {
   const nickname = document.getElementById("nickname").value;
   const password = document.getElementById("password").value;
@@ -101,6 +109,13 @@ function newUser() {
 }
 socket.on("newUserCreated", val => {
   console.log("newUserCreated");
+  document.getElementById("start-screen").style.display = "none";
+});
+socket.on("usernameTaken", val => {
+  document.getElementById("nickname").value = "";
+});
+socket.on("validPlayer", val => {
+  console.log("player valid");
   document.getElementById("start-screen").style.display = "none";
 });
 let movement = {
@@ -149,7 +164,7 @@ socket.on("state", (players, bullets, walls) => {
   Object.values(players).forEach(player => {
     let playerMesh = Meshes[player.id];
     if (!playerMesh) {
-      console.log("create player mesh");
+      // console.log("create player mesh");
       playerMesh = new THREE.Group();
       playerMesh.castShadow = true;
       Meshes[player.id] = playerMesh;
@@ -164,7 +179,7 @@ socket.on("state", (players, bullets, walls) => {
     playerMesh.rotation.y = -player.angle;
 
     if (!playerMesh.getObjectByName("body")) {
-      console.log("create body mesh");
+      //console.log("create body mesh");
       mesh = new THREE.Mesh(
         new THREE.BoxGeometry(player.width, player.width, player.height),
         playerMaterial
@@ -176,7 +191,7 @@ socket.on("state", (players, bullets, walls) => {
 
     if (font) {
       if (!playerMesh.getObjectByName("nickname")) {
-        console.log("create nickname mesh");
+        //console.log("create nickname mesh");
         mesh = new THREE.Mesh(
           new THREE.TextGeometry(player.nickname, {
             font: font,
@@ -200,7 +215,7 @@ socket.on("state", (players, bullets, walls) => {
           mesh = null;
         }
         if (!mesh) {
-          console.log("create health mesh");
+          //console.log("create health mesh");
           mesh = new THREE.Mesh(
             new THREE.TextGeometry("*".repeat(player.health), {
               font: font,
@@ -276,7 +291,7 @@ socket.on("state", (players, bullets, walls) => {
   Object.keys(Meshes).forEach(key => {
     const mesh = Meshes[key];
     if (!mesh.used) {
-      console.log("removing mesh", key);
+      //console.log("removing mesh", key);
       scene.remove(mesh);
       mesh.traverse(mesh2 => {
         if (mesh2.geometry) {
